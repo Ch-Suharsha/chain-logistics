@@ -1,4 +1,4 @@
-altair==6.2.2
+Let's do one thing: clear everything, cut off everything. Even if a Git repo is created, I'll do one thing: I'll go to my GitHub and I'll create a new GitHub repository. In the meantime, you find a way where we can abandon the current process and start everything fresh and push it to this new repository.altair==6.2.2
 faiss-cpu==1.15.0
 langchain-community==0.4.2
 langchain-huggingface==1.2.2
