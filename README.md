@@ -24,9 +24,18 @@ ingestion process uses the separate `chain_ingest` user.
 - The BGE-M3 model available through the Hugging Face cache for the first SOP
   indexing run
 
+Install the application dependencies into the active environment with:
+
+```bash
+python -m pip install -r requirements-docker.txt
+```
+
 The local application uses the existing `data/source/data.txt`, policy file,
 and local ChromaDB directory. No Oracle account, EC2 instance, or cloud
 deployment is required.
+
+The ChromaDB files are generated runtime data and are intentionally ignored by
+Git. A fresh checkout recreates them when the bootstrap script indexes the SOP.
 
 ## Start the application
 

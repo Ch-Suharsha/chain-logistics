@@ -3,3 +3,5 @@
 .venv312/
 __pycache__/
 *.py[cod]
+data/chroma_sop/*
+!data/chroma_sop/.gitkeep
