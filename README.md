@@ -12,6 +12,13 @@ Browser → Streamlit container → orchestrator → tools
                                       └── Open-Meteo weather API
 ```
 
+The user asks a cold-chain logistics question through the Streamlit interface.
+The orchestrator decides whether the request needs fleet data from MySQL, SOP
+guidance from ChromaDB, or weather information from the weather API. It then
+combines the relevant results into a response and records the request in the
+audit log, while database permissions ensure that the agent can access only the
+data it needs.
+
 The agent uses the restricted `chain_agent` database user. It can read only
 the `v_agent_fleet` view and write audit records to `agent_audit_log`. The
 ingestion process uses the separate `chain_ingest` user.
