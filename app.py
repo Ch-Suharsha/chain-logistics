@@ -2,8 +2,7 @@
 import uuid
 
 import streamlit as st
-from langchain_core.messages import HumanMessage
-from src.orchestrator import agent
+from src.orchestrator import invoke_agent
 
 # part-2 : configuring the streamlit page
 st.set_page_config(
@@ -51,18 +50,12 @@ if user_prompt:
     with st.chat_message("user"):
         st.markdown(user_prompt)
 
-    agent_config = {
-        "configurable": {
-            "thread_id": st.session_state.thread_id,
-        }
-    }
-
     with st.chat_message("assistant"):
         with st.spinner("Analyzing your request..."):
             try:
-                result = agent.invoke(
-                    {"messages": [HumanMessage(content=user_prompt)]},
-                    config=agent_config,
+                result = invoke_agent(
+                    user_input=user_prompt,
+                    thread_id=st.session_state.thread_id,
                 )
 
                 assistant_response = result["messages"][-1].content

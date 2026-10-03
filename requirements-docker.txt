@@ -1,0 +1,14 @@
+chromadb
+langchain-chroma
+langchain-community
+langchain-huggingface
+langchain-openai
+langchain-text-splitters
+langgraph
+pandas
+PyMySQL
+python-dotenv
+requests
+sentence-transformers
+SQLAlchemy
+streamlit

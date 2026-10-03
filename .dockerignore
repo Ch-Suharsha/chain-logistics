@@ -1,0 +1,9 @@
+.git
+.env
+.venv
+.venv312
+__pycache__
+*.py[cod]
+data/raw
+data/chroma_sop
+video extraction

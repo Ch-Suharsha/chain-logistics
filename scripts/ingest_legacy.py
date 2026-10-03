@@ -98,7 +98,7 @@ print(f"writing the data to the table: {table_name}")
 df_legacy.to_sql(
     name=table_name,
     con=engine,
-    if_exists="append",
+    if_exists="replace",
     index=False,
 )
 

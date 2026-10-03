@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Annotated, TypedDict
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
+from sqlalchemy import text
 
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langgraph.checkpoint.memory import MemorySaver
@@ -18,7 +19,7 @@ PROJECT_ROOT = SCRIPT_DIR.parent
 
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.agent_tools import AVAILABLE_TOOLS
+from src.agent_tools import AVAILABLE_TOOLS, db_engine
 
 
 # part3- loading the env varialbes
@@ -167,7 +168,90 @@ agent = graph_builder.compile(
     checkpointer=memory,
 )
 
-# part-13: defining the chat-loop
+
+# part-13: audit logging and shared agent invocation
+
+def _tools_used_from_result(result: dict) -> str:
+    tool_names = []
+
+    for message in result.get("messages", []):
+        for tool_call in getattr(message, "tool_calls", []) or []:
+            tool_name = tool_call.get("name")
+            if tool_name and tool_name not in tool_names:
+                tool_names.append(tool_name)
+
+    return ", ".join(tool_names) or "none"
+
+
+def write_audit_log(
+    thread_id: str,
+    user_question: str,
+    tools_used: str,
+    status: str,
+    error_message: str | None = None,
+) -> None:
+    audit_statement = text(
+        """
+        INSERT INTO cold_chain.agent_audit_log
+        (thread_id, user_question, tools_used, status, error_message)
+        VALUES
+        (:thread_id, :user_question, :tools_used, :status, :error_message)
+        """
+    )
+
+    try:
+        with db_engine.begin() as connection:
+            connection.execute(
+                audit_statement,
+                {
+                    "thread_id": thread_id,
+                    "user_question": user_question,
+                    "tools_used": tools_used,
+                    "status": status,
+                    "error_message": error_message,
+                },
+            )
+    except Exception as audit_error:
+        print(f"Audit logging failed: {audit_error}")
+
+
+def invoke_agent(user_input: str, thread_id: str) -> dict:
+    agent_config = {
+        "configurable": {
+            "thread_id": thread_id,
+        }
+    }
+
+    try:
+        result = agent.invoke(
+            {
+                "messages": [
+                    HumanMessage(content=user_input)
+                ]
+            },
+            config=agent_config,
+        )
+
+        write_audit_log(
+            thread_id=thread_id,
+            user_question=user_input,
+            tools_used=_tools_used_from_result(result),
+            status="success",
+        )
+
+        return result
+
+    except Exception as error:
+        write_audit_log(
+            thread_id=thread_id,
+            user_question=user_input,
+            tools_used="unknown",
+            status="error",
+            error_message=str(error),
+        )
+        raise
+
+# part-14: defining the chat-loop
 
 
 def run_chat() -> None:
@@ -188,9 +272,9 @@ def run_chat() -> None:
             break
         if not user_input:
             continue
-        result = agent.invoke(
-            {"messages": [HumanMessage(content=user_input)]},
-            config=config,
+        result = invoke_agent(
+            user_input=user_input,
+            thread_id=config["configurable"]["thread_id"],
         )
 
         final_message = result["messages"][-1]
@@ -199,7 +283,7 @@ def run_chat() -> None:
         print(final_message.content)
 
 
-# part-14: adding the entry point
+# part-15: adding the entry point
 
 if __name__ == "__main__":
     run_chat()
