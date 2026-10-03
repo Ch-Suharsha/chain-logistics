@@ -55,13 +55,13 @@ df_legacy["SYS_INGEST_FLAG"] = "Y"
 db_host = os.getenv("MYSQL_HOST", "localhost")
 db_port = int(os.getenv("MYSQL_PORT", "3306"))
 db_name = os.getenv("MYSQL_DATABASE", "cold_chain")
-db_user = os.getenv("MYSQL_USER")
-db_password = os.getenv("MYSQL_PASSWORD")
+db_user = os.getenv("MYSQL_INGEST_USER")
+db_password = os.getenv("MYSQL_INGEST_PASSWORD")
 
 # validating the database
 required_settings = {
-    "MYSQL_USER": db_user,
-    "MYSQL_PASSWORD": db_password,
+    "MYSQL_INGEST_USER": db_user,
+    "MYSQL_INGEST_PASSWORD": db_password,
 }
 
 missing_settings = [name for name, value in required_settings.items() if not value]
@@ -98,7 +98,7 @@ print(f"writing the data to the table: {table_name}")
 df_legacy.to_sql(
     name=table_name,
     con=engine,
-    if_exists="replace",
+    if_exists="append",
     index=False,
 )
 
