@@ -16,6 +16,16 @@ The agent uses the restricted `chain_agent` database user. It can read only
 the `v_agent_fleet` view and write audit records to `agent_audit_log`. The
 ingestion process uses the separate `chain_ingest` user.
 
+## System design
+
+Detailed architecture:
+
+![Cold-Chain Logistics Assistant system design](docs/system-design-social.png)
+
+Application flow:
+
+![Cold-Chain Logistics Assistant application flow](docs/architecture-flow-medium.png)
+
 ## Prerequisites
 
 - Docker Desktop
